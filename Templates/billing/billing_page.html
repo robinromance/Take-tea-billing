@@ -71,35 +71,33 @@ body {
 }
 
 /* Container & Animation */
+
 .card {
-    height: 280px; /* Adjusted to fit content */
-    perspective: 1000px;
-    background: transparent;
-}
-
-.card-inner {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transition: transform 0.6s;
-    transform-style: preserve-3d;
-}
-
-.card:hover .card-inner {
-    transform: rotateY(180deg);
-}
-
-.card-front, .card-back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
+    height: 280px;
     background: white;
     border-radius: 14px;
+    backdrop-filter: blur(4px);
     overflow: hidden;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-    display: flex;
-    flex-direction: column;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+/* ZOOM + SHADOW EFFECT */
+.card:hover {
+    transform: scale(1.06);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.25);
+}
+
+/* IMAGE SMOOTH ZOOM */
+.card img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.card:hover img {
+    transform: scale(1.08);
 }
 
 /* Back Side Specifics */
@@ -246,6 +244,111 @@ body {
         z-index: -1;
     }
 }
+
+/* ================= MOBILE VIEW ================= */
+@media (max-width: 768px) {
+
+    /* TOP BAR */
+    .topbar {
+        grid-template-columns: 1fr;
+        row-gap: 10px;
+        padding: 12px;
+        text-align: center;
+    }
+
+    .app-title {
+        font-size: 20px;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    .app-title small {
+        font-size: 12px;
+        font-weight: 400;
+    }
+
+    /* SEARCH BAR CENTER & BOLD */
+    .search-box input {
+        width: 100%;
+        font-size: 18px;
+        font-weight: bold;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* PRODUCTS GRID → 2 PER ROW */
+    .products {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+        padding: 12px;
+        margin-right: 0; /* remove desktop cart space */
+        margin-bottom: 130px; /* space for cart */
+    }
+
+    /* CARD */
+    .card {
+        height: auto;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    }
+
+    .card img {
+        height: 120px;
+    }
+
+    .card-body h6 {
+        font-size: 15px;
+    }
+
+    .price {
+        font-size: 16px;
+    }
+
+    /* QTY BAR → BIG TOUCH BUTTONS */
+    .qty-bar {
+        padding: 10px;
+    }
+
+    .qty-bar button {
+        width: 42px;
+        height: 42px;
+        font-size: 22px;
+    }
+
+    .qty {
+        font-size: 18px;
+    }
+
+    /* CART → FIXED BOTTOM */
+    .cart {
+        position: fixed;
+        bottom: 0;
+        top: auto;
+        left: 0;
+        width: 100%;
+        height: auto;
+        max-height: 45%;
+        border-radius: 18px 18px 0 0;
+        box-shadow: 0 -10px 30px rgba(0,0,0,0.4);
+        z-index: 2000;
+    }
+
+    .cart-header {
+        font-size: 18px;
+        padding: 12px;
+    }
+
+    #cart {
+        max-height: 160px;
+        overflow-y: auto;
+    }
+
+    .cart button {
+        width: calc(100% - 20px);
+        margin: 10px;
+        font-size: 18px;
+    }
+}
+
 </style>
 </head>
 
@@ -273,37 +376,19 @@ body {
 {% for product in products %}
     <div class="card product-card" data-name="{{ product.name|lower }}">
         <div class="card-inner">
-            
-            <!-- FRONT SIDE -->
-            <div class="card-front">
+            <div class="card product-card" data-name="{{ product.name|lower }}">
                 <img src="{{ product.image.url }}">
                 <div class="card-body">
                     <h6>{{ product.name }}</h6>
                     <div class="price">₹{{ product.price }}</div>
                 </div>
-                <!-- Controls only on the back -->
-                <div class="qty-bar">
-                    <button onclick="event.stopPropagation(); decrease('{{ product.id }}')">−</button>
-                    <div class="qty" id="qty-{{ product.id }}">0</div>
-                    <button onclick="event.stopPropagation(); increase('{{ product.id }}','{{ product.name }}',{{ product.price }})">+</button>
-                </div>
-            </div>
 
-            <!-- BACK SIDE -->
-            <div class="card-back">
-                <img src="{{ product.image.url }}" class="back-img">
-                <div class="card-body">
-                    <h6>{{ product.name }}</h6>
-                    <div class="price">₹{{ product.price }}</div>
-                </div>
-                <!-- Controls only on the back -->
                 <div class="qty-bar">
-                    <button onclick="event.stopPropagation(); decrease('{{ product.id }}')">−</button>
+                    <button onclick="decrease('{{ product.id }}')">−</button>
                     <div class="qty" id="qty-{{ product.id }}">0</div>
-                    <button onclick="event.stopPropagation(); increase('{{ product.id }}','{{ product.name }}',{{ product.price }})">+</button>
+                    <button onclick="increase('{{ product.id }}','{{ product.name }}',{{ product.price }})">+</button>
                 </div>
-            </div>
-
+            </div> 
         </div>
     </div>
 {% endfor %}
