@@ -1,0 +1,15 @@
+<h2>Sales Report</h2>
+<table border="1">
+<tr>
+    <th>Bill ID</th>
+    <th>Date</th>
+    <th>Total</th>
+</tr>
+{% for r in reports %}
+<tr>
+    <td>{{ r.bill_id }}</td>
+    <td>{{ r.date }}</td>
+    <td>₹{{ r.total_amount }}</td>
+</tr>
+{% endfor %}
+</table>
