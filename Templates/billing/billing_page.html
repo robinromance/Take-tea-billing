@@ -156,6 +156,8 @@
 
     /* QTY BUTTONS – BASE */
     .qty-bar button {
+        position: relative;
+        overflow: hidden;
         border: none;
         background: white;
         color: #0d6efd;
@@ -190,9 +192,33 @@
         box-shadow: 0 3px 8px rgba(0,0,0,0.2);
     }
 
+    .qty-bar button::after {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.15);
+        border-radius: 50%;
+        transform: scale(0);
+        opacity: 0;
+        transition: transform 0.4s, opacity 0.6s;
+    }
+
+    .qty-bar button:active::after {
+        transform: scale(1.8);
+        opacity: 0;
+    }
+
     .qty {
         font-size: 20px;
         font-weight: bold;
+    }
+
+    .qty-bar button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
     }
 
     /* ================= CART ================= */
@@ -273,6 +299,18 @@
             opacity: 0.08;
             z-index: -1;
         }
+    }
+    @keyframes shake {
+        0% { transform: translateX(0); }
+        20% { transform: translateX(-4px); }
+        40% { transform: translateX(4px); }
+        60% { transform: translateX(-4px); }
+        80% { transform: translateX(4px); }
+        100% { transform: translateX(0); }
+    }
+
+    .shake {
+        animation: shake 0.35s ease;
     }
 
     /* ================= MOBILE VIEW ================= */
@@ -391,7 +429,6 @@
     }
 </style>
 </head>
-
 <body>
 
 <!-- ================= TOP BAR ================= -->
@@ -457,25 +494,44 @@ function filterProducts() {
 /* CART LOGIC */
 function increase(id, name, price) {
     if (!cart[id]) cart[id] = {name, price, qty: 0};
+
     cart[id].qty++;
-    updateUI(id);
+
+    const qtyEl = document.getElementById(`qty-${id}`);
+    const minusBtn = qtyEl.parentElement.querySelector("button:first-child");
+
+    qtyEl.innerText = cart[id].qty;
+    minusBtn.disabled = false;
+
+    renderCart();
 }
 
 function decrease(id) {
-    if (!cart[id]) return;
+    const qtyEl = document.getElementById(`qty-${id}`);
+    const minusBtn = qtyEl.parentElement.querySelector("button:first-child");
+
+    if (!cart[id]) {
+        minusBtn.classList.add("shake");
+        setTimeout(() => minusBtn.classList.remove("shake"), 350);
+        return;
+    }
 
     cart[id].qty--;
 
     if (cart[id].qty <= 0) {
         delete cart[id];
-        document.getElementById(`qty-${id}`).innerText = 0;
+        qtyEl.innerText = 0;
+
+        minusBtn.disabled = true;
+        minusBtn.classList.add("shake");
+
+        setTimeout(() => minusBtn.classList.remove("shake"), 350);
     } else {
-        document.getElementById(`qty-${id}`).innerText = cart[id].qty;
+        qtyEl.innerText = cart[id].qty;
     }
 
     renderCart();
 }
-
 
 function updateUI(id) {
     document.getElementById(`qty-${id}`).innerText = cart[id]?.qty || 0;
